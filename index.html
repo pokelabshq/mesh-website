@@ -655,46 +655,49 @@ $ python3 mesh.py --tools</pre>
   </div>
 </footer>
 
-<script>
+<script type="module">
+import { run, check } from '/runtimes/js/mesh.js';
+
 function runMesh() {
   const input = document.getElementById('mesh-input').value;
   const output = document.getElementById('mesh-output');
   const indicator = document.getElementById('status-indicator');
   const status = document.getElementById('status-text');
 
+  // check syntax first
+  const errs = check(input);
+  if (errs.length > 0) {
+    output.innerHTML = errs.map(e => `<span class="err">error: ${e}</span>`).join('\n');
+    indicator.className = 'indicator error';
+    status.textContent = `${errs.length} syntax error(s)`;
+    return;
+  }
+
   indicator.className = 'indicator';
   status.textContent = 'running...';
   output.textContent = 'executing...';
 
-  // simulate execution for now
-  // TODO: wire up actual interpreter via wasm or api
-  setTimeout(() => {
-    const lines = input.split('\n');
-    const results = [];
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-      if (trimmed.includes('http.get') || trimmed.includes('http.post')) {
-        results.push(`[fetch] ${trimmed}`);
-        results.push('  → status: 200');
-      } else if (trimmed.includes('json.parse')) {
-        results.push('[parse] json → object');
-      } else if (trimmed.includes('→')) {
-        results.push(`[pipe] ${trimmed.replace('→', '→')}`);
-      } else if (trimmed.includes('print')) {
-        results.push('[output] ' + (results.length + ' items'));
-      } else if (trimmed.includes('format')) {
-        results.push('[format] ' + trimmed.match(/"([^"]+)"/)?.[1] || '');
+  run(input).then(result => {
+    if (result !== undefined && result !== null) {
+      if (typeof result === 'object') {
+        if (result.ok === false) {
+          output.innerHTML = `<span class="err">error: ${result.error}</span>`;
+          indicator.className = 'indicator error';
+        } else {
+          output.textContent = JSON.stringify(result.data ?? result, null, 2);
+          indicator.className = 'indicator';
+        }
       } else {
-        results.push(`[step] ${trimmed}`);
+        output.textContent = String(result);
+        indicator.className = 'indicator';
       }
     }
-
-    output.textContent = results.join('\n');
     status.textContent = 'done';
-    indicator.className = 'indicator';
-  }, 500);
+  }).catch(e => {
+    output.innerHTML = `<span class="err">runtime error: ${e.message}</span>`;
+    indicator.className = 'indicator error';
+    status.textContent = 'error';
+  });
 }
 
 function clearAll() {
@@ -737,6 +740,11 @@ function loadExample(name) {
   document.getElementById('mesh-input').value = examples[name] || '';
   runMesh();
 }
+
+// make functions available globally
+window.runMesh = runMesh;
+window.clearAll = clearAll;
+window.loadExample = loadExample;
 </script>
 
 </body>
