@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mesh — a flow-based programming language for agents</title>
+<style>
+/* ── reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  font-size: 14px; line-height: 1.6;
+  color: #e0e0e0;
+  background: #0a0a0a;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: #e0e0e0; text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: #fff; }
+::selection { background: #333; color: #fff; }
+
+/* ── layout ─────────────────────────────────────────────────────────── */
+.container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+/* ── nav ────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.95);
+  border-bottom: 1px solid #1a1a1a;
+  backdrop-filter: blur(8px);
+}
+nav .container { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+nav .logo { font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; }
+nav .logo span { color: #666; }
+nav .links { display: flex; gap: 24px; }
+nav .links a { color: #888; text-decoration: none; font-size: 13px; }
+nav .links a:hover { color: #fff; }
+nav .links .active { color: #fff; }
+
+/* ── hero ───────────────────────────────────────────────────────────── */
+.hero {
+  padding: 160px 0 120px;
+  border-bottom: 1px solid #1a1a1a;
+}
+.hero h1 {
+  font-size: 48px; font-weight: 700; color: #fff;
+  letter-spacing: -1px; margin-bottom: 16px;
+}
+.hero h1 span { color: #444; }
+.hero .subtitle { font-size: 18px; color: #888; max-width: 560px; margin-bottom: 40px; line-height: 1.5; }
+.hero .cta { display: flex; gap: 16px; align-items: center; }
+.hero .cta a {
+  display: inline-block; padding: 12px 24px;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  border: 1px solid #333; border-radius: 4px;
+  color: #e0e0e0;
+}
+.hero .cta a:hover { border-color: #666; color: #fff; }
+.hero .cta a.primary {
+  background: #fff; color: #0a0a0a; border-color: #fff;
+}
+.hero .cta a.primary:hover { background: #e0e0e0; }
+
+/* ── hero demo ──────────────────────────────────────────────────────── */
+.demo {
+  margin-top: 60px;
+  background: #111; border: 1px solid #1a1a1a; border-radius: 6px;
+  overflow: hidden;
+}
+.demo .bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; border-bottom: 1px solid #1a1a1a;
+}
+.demo .bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #333; }
+.demo .bar .dot:nth-child(1) { background: #ff5f56; }
+.demo .bar .dot:nth-child(2) { background: #ffbd2e; }
+.demo .bar .dot:nth-child(3) { background: #27c93f; }
+.demo .bar .title { margin-left: 8px; color: #555; font-size: 12px; }
+.demo pre {
+  padding: 20px 24px; margin: 0;
+  font-size: 13px; line-height: 1.7;
+  overflow-x: auto;
+}
+.demo .kw { color: #c678dd; }
+.demo .fn { color: #61afef; }
+.demo .str { color: #98c379; }
+.demo .cm { color: #5c6370; }
+.demo .pipe { color: #e5c07b; }
+.demo .num { color: #d19a66; }
+
+/* ── sections ──────────────────────────────────────────────────────── */
+section { padding: 100px 0; border-bottom: 1px solid #1a1a1a; }
+section:last-child { border-bottom: none; }
+section h2 {
+  font-size: 28px; font-weight: 700; color: #fff;
+  margin-bottom: 12px; letter-spacing: -0.5px;
+}
+section h2 span { color: #444; }
+section .lede { font-size: 16px; color: #888; max-width: 600px; margin-bottom: 48px; line-height: 1.6; }
+
+/* ── features grid ──────────────────────────────────────────────────── */
+.grid-3 {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+.grid-3 .card {
+  padding: 24px; background: #111; border: 1px solid #1a1a1a; border-radius: 6px;
+}
+.grid-3 .card h3 {
+  font-size: 14px; font-weight: 700; color: #fff;
+  margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.grid-3 .card p { font-size: 13px; color: #888; line-height: 1.6; }
+
+/* ── syntax showcase ────────────────────────────────────────────────── */
+.showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.showcase .panel {
+  background: #111; border: 1px solid #1a1a1a; border-radius: 6px; overflow: hidden;
+}
+.showcase .panel header {
+  padding: 12px 20px; border-bottom: 1px solid #1a1a1a;
+  font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.showcase .panel header .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
+.showcase .panel pre { padding: 20px; font-size: 13px; line-height: 1.7; color: #c0c0c0; margin: 0; }
+.showcase .panel pre .cm { color: #5c6370; }
+.showcase .panel pre .fn { color: #61afef; }
+.showcase .panel pre .str { color: #98c379; }
+.showcase .panel pre .kw { color: #c678dd; }
+.showcase .panel pre .pipe { color: #e5c07b; }
+.showcase .panel pre .num { color: #d19a66; }
+.showcase .panel pre .ref { color: #e06c75; }
+
+/* ── tools table ────────────────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table th {
+  text-align: left; padding: 12px 16px;
+  border-bottom: 1px solid #1a1a1a; color: #555;
+  font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+table td { padding: 12px 16px; border-bottom: 1px solid #111; color: #c0c0c0; }
+table td:first-child { color: #61afef; font-weight: 500; }
+table td:nth-child(2) { color: #888; }
+table td:nth-child(3) { color: #98c379; font-size: 12px; }
+table tr:last-child td { border-bottom: none; }
+table code { background: #1a1a1a; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+
+/* ── patterns ───────────────────────────────────────────────────────── */
+.pattern { margin-bottom: 32px; }
+.pattern h3 {
+  font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px;
+}
+.pattern .meta { font-size: 12px; color: #555; margin-bottom: 16px; }
+.pattern .meta span { color: #888; }
+
+/* ── playground ─────────────────────────────────────────────────────── */
+.playground {
+  background: #111; border: 1px solid #1a1a1a; border-radius: 6px; overflow: hidden;
+}
+.playground .toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid #1a1a1a;
+}
+.playground .toolbar .left { display: flex; align-items: center; gap: 12px; }
+.playground .toolbar .label { font-size: 12px; color: #555; }
+.playground .toolbar button {
+  padding: 6px 14px; font-size: 12px; font-family: inherit;
+  background: transparent; border: 1px solid #333; border-radius: 4px;
+  color: #888; cursor: pointer;
+}
+.playground .toolbar button:hover { border-color: #666; color: #fff; }
+.playground .toolbar button.active { background: #fff; color: #0a0a0a; border-color: #fff; }
+.playground .panes { display: grid; grid-template-columns: 1fr 1fr; }
+.playground .pane { border-right: 1px solid #1a1a1a; }
+.playground .pane:last-child { border-right: none; }
+.playground .pane header {
+  padding: 10px 16px; border-bottom: 1px solid #1a1a1a;
+  font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 6px;
+}
+.playground .pane header .dot { width: 5px; height: 5px; border-radius: 50%; background: #333; }
+.playground .pane textarea {
+  width: 100%; min-height: 240px; padding: 16px;
+  background: transparent; border: none; outline: none; resize: vertical;
+  font-family: inherit; font-size: 13px; line-height: 1.7; color: #c0c0c0;
+}
+.playground .pane .output {
+  min-height: 240px; padding: 16px; font-size: 13px; line-height: 1.7;
+  color: #888; white-space: pre-wrap; overflow-x: auto;
+  background: #0d0d0d;
+}
+.playground .pane .output .err { color: #e06c75; }
+.playground .pane .output .ok { color: #98c379; }
+.playground .status {
+  padding: 8px 16px; border-top: 1px solid #1a1a1a;
+  font-size: 11px; color: #444; display: flex; align-items: center; gap: 8px;
+}
+.playground .status .indicator { width: 5px; height: 5px; border-radius: 50%; background: #27c93f; }
+.playground .status .indicator.error { background: #ff5f56; }
+
+/* ── footer ─────────────────────────────────────────────────────────── */
+footer {
+  padding: 60px 0; border-top: 1px solid #1a1a1a;
+  font-size: 13px; color: #555;
+}
+footer .container { display: flex; justify-content: space-between; align-items: center; }
+footer a { color: #888; text-decoration: none; }
+footer a:hover { color: #fff; }
+footer .links { display: flex; gap: 20px; }
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 32px; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .showcase { grid-template-columns: 1fr; }
+  .playground .panes { grid-template-columns: 1fr; }
+  .playground .pane { border-right: none; border-bottom: 1px solid #1a1a1a; }
+  nav .links { gap: 16px; }
+  nav .links a { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- nav -->
+<nav>
+  <div class="container">
+    <a href="#" class="logo">mesh<span>.</span></a>
+    <div class="links">
+      <a href="#features">features</a>
+      <a href="#syntax">syntax</a>
+      <a href="#tools">tools</a>
+      <a href="#patterns">patterns</a>
+      <a href="#playground">playground</a>
+      <a href="https://github.com/pokelabshq/mesh">github</a>
+    </div>
+  </div>
+</nav>
+
+<!-- hero -->
+<div class="hero">
+  <div class="container">
+    <h1>a language <span>for agents</span></h1>
+    <p class="subtitle">
+      mesh is a flow-based programming language designed from the ground up
+      for ai agents. no variables, no state, no boilerplate. just pipes and tools.
+    </p>
+    <div class="cta">
+      <a href="#playground" class="primary">try it</a>
+      <a href="#syntax">read the docs</a>
+      <a href="https://github.com/pokelabshq/mesh/blob/main/SPEC.md">spec</a>
+    </div>
+
+    <div class="demo">
+      <div class="bar">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <span class="title">example.mesh</span>
+      </div>
+      <pre><span class="cm"># fetch data, transform, output</span>
+
+http.get <span class="str">"https://api.github.com/repos/pokelabshq/council/commits"</span>
+  <span class="pipe">→</span> json.parse
+  <span class="pipe">→</span> .[<span class="num">0</span>:<span class="num">5</span>]
+  <span class="pipe">→</span> <span class="kw">for each</span> commit:
+      format <span class="str">"{{.sha}} — {{.commit.message}}"</span>
+  <span class="pipe">→</span> print</pre>
+    </div>
+  </div>
+</div>
+
+<!-- features -->
+<section id="features">
+  <div class="container">
+    <h2>features<span>.</span></h2>
+    <p class="lede">everything you need to write agent workflows, nothing you don't.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>no state</h3>
+        <p>no variables, no assignment, no mutation. data flows through pipes from left to right. what you read is what executes.</p>
+      </div>
+      <div class="card">
+        <h3>tool-native</h3>
+        <p>every operation is a tool call. built-in and external tools are the same. <code>http.get</code>, <code>json.parse</code>, <code>sentiment.analyze</code> — all tools.</p>
+      </div>
+      <div class="card">
+        <h3>errors are data</h3>
+        <p>failures don't crash the pipeline. they flow through as values. catch them with <code>on_error:</code>, retry with <code>retry 3</code>.</p>
+      </div>
+      <div class="card">
+        <h3>parallel by default</h3>
+        <p>independent operations run concurrently. <code>parallel:</code> blocks with named branches. <code>merge</code> to combine results.</p>
+      </div>
+      <div class="card">
+        <h3>agent-readable</h3>
+        <p>syntax is close to natural language. agents can read, write, and generate mesh without special prompting or training.</p>
+      </div>
+      <div class="card">
+        <h3>self-describing</h3>
+        <p>every mesh program documents itself. the code reads like the spec. no separate documentation needed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- syntax -->
+<section id="syntax">
+  <div class="container">
+    <h2>syntax<span>.</span></h2>
+    <p class="lede">here's everything mesh can do. each example is real, runnable code.</p>
+
+    <!-- basic pipeline -->
+    <div class="showcase">
+      <div class="panel">
+        <header><div class="dot"></div> basic pipeline</header>
+        <pre><span class="cm"># the core of mesh: pipes</span>
+
+http.get <span class="str">"https://api.example.com/data"</span>
+  <span class="pipe">→</span> json.parse
+  <span class="pipe">→</span> .items[:<span class="num">5</span>]
+  <span class="pipe">→</span> sort <span class="kw">by</span>: .name
+  <span class="pipe">→</span> print</pre>
+      </div>
+      <div class="panel">
+        <header><div class="dot"></div> data access</header>
+        <pre><span class="cm"># access fields, index, slice</span>
+
+.http.get <span class="str">"..."</span> <span class="pipe">→</span> json.parse
+  <span class="pipe">→</span> .users[<span class="num">0</span>]        <span class="cm"># first</span>
+  <span class="pipe">→</span> .name               <span class="cm"># field</span>
+  <span class="pipe">→</span> format <span class="str">"hello {{.}}"</span>
+
+<span class="cm"># slicing works everywhere</span>
+.items[<span class="num">0</span>:<span class="num">10</span>]             <span class="cm"># first 10</span>
+.items[<span class="num">-5</span>:]               <span class="cm"># last 5</span></pre>
+      </div>
+    </div>
+
+    <div class="showcase" style="margin-top:24px">
+      <div class="panel">
+        <header><div class="dot"></div> conditionals + error handling</header>
+        <pre><span class="cm"># if / then / else</span>
+check http.get <span class="str">"https://example.com/health"</span>
+  <span class="pipe">→</span> <span class="kw">if</span> .status != <span class="num">200</span>:
+      log <span class="str">"error"</span> <span class="str">"down: {{.status}}"</span>
+  <span class="pipe">→</span> <span class="kw">else</span>:
+      log <span class="str">"info"</span> <span class="str">"healthy"</span>
+
+<span class="cm"># retry + error handling</span>
+<span class="kw">retry</span> <span class="num">3</span>, backoff <span class="num">2</span>s:
+  http.get <span class="str">"https://flaky.example.com"</span>
+<span class="pipe">→</span> <span class="kw">on_error</span>:
+    log <span class="str">"failed after 3 retries"</span>    <span class="kw">return</span> {ok: <span class="kw">false</span>}</pre>
+      </div>
+      <div class="panel">
+        <header><div class="dot"></div> parallel + loops</header>
+        <pre><span class="cm"># parallel branches</span>
+<span class="kw">parallel</span>:
+  branch users:
+    http.get <span class="str">"url/users"</span> <span class="pipe">→</span> json.parse
+  branch posts:
+    http.get <span class="str">"url/posts"</span> <span class="pipe">→</span> json.parse
+<span class="pipe">→</span> merge
+<span class="pipe">→</span> print
+
+<span class="cm"># for each</span>
+.items
+  <span class="pipe">→</span> <span class="kw">for each</span> .items:
+      format <span class="str">"{{.name}}: {{.value}}"</span>
+      <span class="pipe">→</span> print</pre>
+      </div>
+    </div>
+
+    <div class="showcase" style="margin-top:24px">
+      <div class="panel">
+        <header><div class="dot"></div> tool definition</header>
+        <pre><span class="cm"># define reusable tools</span>
+<span class="kw">tool</span> sentiment:
+  description: <span class="str">"analyze text sentiment"</span>
+  <span class="kw">input</span>:
+    text: string
+  <span class="kw">output</span>:
+    score: float
+    label: string
+  <span class="kw">steps</span>:
+    http.post <span class="str">"http://localhost:8764/api/analyze"</span>
+      body: {text: input.text}
+    <span class="pipe">→</span> json.parse
+    <span class="pipe">→</span> format <span class="str">"{{.score}} ({{.label}})"</span></pre>
+      </div>
+      <div class="panel">
+        <header><div class="dot"></div> composition</header>
+        <pre><span class="cm"># import and compose</span>
+<span class="kw">import</span> <span class="str">"./tools/social.mesh"</span>
+
+<span class="cm"># real-world: daily digest</span>
+<span class="kw">parallel</span>:
+  branch commits:
+    github.commits <span class="str">"pokelabshq/council"</span>
+      .since:<span class="str">"1d"</span>
+  branch stars:
+    github.stars <span class="str">"pokelabshq/council"</span>
+<span class="pipe">→</span> merge <span class="pipe">→</span> summarize
+<span class="pipe">→</span> telegram.send <span class="str">"@thealxlabs"</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- tools -->
+<section id="tools">
+  <div class="container">
+    <h2>tools<span>.</span></h2>
+    <p class="lede">30+ built-in tools. everything is a tool — there's no special syntax for "built-in" vs "external".</p>
+
+    <table>
+      <thead>
+        <tr><th>tool</th><th>description</th><th>example</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>json.parse</td><td>parse json string</td><td>'str' → json.parse → .field</td></tr>
+        <tr><td>json.stringify</td><td>serialize to json</td><td>{data} → json.stringify</td></tr>
+        <tr><td>format</td><td>format as string</td><td>{name: "x"} → format "hi {{.name}}"</td></tr>
+        <tr><td>http.get</td><td>http get request</td><td>"http://..." → http.get → .status</td></tr>
+        <tr><td>http.post</td><td>http post request</td><td>"http://..." → http.post body: {}</td></tr>
+        <tr><td>filter</td><td>filter collection</td><td>.items → filter</td></tr>
+        <tr><td>map</td><td>extract field</td><td>.items → map</td></tr>
+        <tr><td>sort</td><td>sort collection</td><td>.items → sort by: .date</td></tr>
+        <tr><td>unique</td><td>deduplicate</td><td>.items → unique by: .id</td></tr>
+        <tr><td>flatten</td><td>flatten nested</td><td>[[1,2],[3]] → flatten</td></tr>
+        <tr><td>take</td><td>take first n</td><td>.items → take 5</td></tr>
+        <tr><td>skip</td><td>skip first n</td><td>.items → skip 10</td></tr>
+        <tr><td>count</td><td>count items</td><td>.items → count</td></tr>
+        <tr><td>first</td><td>first item</td><td>.items → first</td></tr>
+        <tr><td>last</td><td>last item</td><td>.items → last</td></tr>
+        <tr><td>length</td><td>length of collection</td><td>.items → length</td></tr>
+        <tr><td>keys</td><td>dict keys</td><td>{data} → keys</td></tr>
+        <tr><td>values</td><td>dict values</td><td>{data} → values</td></tr>
+        <tr><td>merge</td><td>merge parallel results</td><td>parallel: ... → merge</td></tr>
+        <tr><td>print</td><td>print to stdout</td><td>→ print</td></tr>
+        <tr><td>log</td><td>log message</td><td>→ log "info" "message"</td></tr>
+        <tr><td>return</td><td>return value</td><td>→ return {ok: true}</td></tr>
+        <tr><td>wait</td><td>wait seconds</td><td>wait 5</td></tr>
+        <tr><td>save</td><td>save to file</td><td>→ save "output.json"</td></tr>
+        <tr><td>load</td><td>load from file</td><td>load "input.json"</td></tr>
+        <tr><td>shell</td><td>run shell command</td><td>shell "ls -la"</td></tr>
+        <tr><td>env</td><td>read env var</td><td>env "API_KEY"</td></tr>
+        <tr><td>now</td><td>current timestamp</td><td>→ now</td></tr>
+        <tr><td>uuid</td><td>generate uuid</td><td>→ uuid</td></tr>
+        <tr><td>type</td><td>type name</td><td>42 → type</td></tr>
+        <tr><td>string</td><td>to string</td><td>42 → string</td></tr>
+        <tr><td>number</td><td>to number</td><td>"42" → number</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- patterns -->
+<section id="patterns">
+  <div class="container">
+    <h2>patterns<span>.</span></h2>
+    <p class="lede">common patterns for real-world agent workflows. copy, modify, ship.</p>
+
+    <div class="pattern">
+      <h3>service monitor</h3>
+      <div class="meta">health checks <span>·</span> alerting <span>·</span> retry</div>
+      <div class="panel" style="background:#111;border:1px solid #1a1a1a;border-radius:6px;overflow:hidden">
+        <header style="padding:12px 20px;border-bottom:1px solid #1a1a1a;font-size:12px;color:#555;text-transform:uppercase;letter-spacing:0.5px"><div class="dot"></div> monitor.mesh</header>
+        <pre style="padding:20px;font-size:13px;line-height:1.7;color:#c0c0c0;margin:0"><span class="kw">loop every</span> <span class="num">60</span>s:
+  check http.get <span class="str">"https://pokelabs.org/health"</span>
+    <span class="num">→</span> timeout <span class="num">10</span>s
+    <span class="num">→</span> <span class="kw">retry</span> <span class="num">2</span>:
+        http.get
+    <span class="num">→</span> <span class="kw">if</span> .status != <span class="num">200</span>:
+        <span class="kw">parallel</span>:
+          branch alert:
+            telegram.send <span class="str">"@thealxlabs"</span> <span class="str">"⚠️ pokelabs.org is down ({{.status}})"</span>
+          branch log:
+            log.error <span class="str">"health check failed: {{.status}}"</span>
+    <span class="num">→</span> <span class="kw">else</span>:
+        log <span class="str">"pokelabs.org healthy ({{.response_time}}ms)"</span></pre>
+      </div>
+    </div>
+
+    <div class="pattern">
+      <h3>data pipeline</h3>
+      <div class="meta">fetch <span>·</span> transform <span>·</span> output</div>
+      <div class="panel" style="background:#111;border:1px solid #1a1a1a;border-radius:6px;overflow:hidden">
+        <header style="padding:12px 20px;border-bottom:1px solid #1a1a1a;font-size:12px;color:#555;text-transform:uppercase;letter-spacing:0.5px"><div class="dot"></div> pipeline.mesh</header>
+        <pre style="padding:20px;font-size:13px;line-height:1.7;color:#c0c0c0;margin:0">http.get <span class="str">"https://api.example.com/users"</span>
+  <span class="num">→</span> json.parse
+  <span class="num">→</span> .users
+  <span class="num">→</span> sort <span class="kw">by</span>: .created_at
+  <span class="num">→</span> <span class="kw">take</span> <span class="num">20</span>
+  <span class="num">→</span> <span class="kw">for each</span> .users:
+      format <span class="str">"{{.name}} ({{.email}}) — {{.role}}"</span>
+  <span class="num">→</span> print
+  <span class="num">→</span> <span class="kw">save</span> <span class="str">"report.json"</span></pre>
+      </div>
+    </div>
+
+    <div class="pattern">
+      <h3>daily digest</h3>
+      <div class="meta">parallel <span>·</span> merge <span>·</span> format <span>·</span> notify</div>
+      <div class="panel" style="background:#111;border:1px solid #1a1a1a;border-radius:6px;overflow:hidden">
+        <header style="padding:12px 20px;border-bottom:1px solid #1a1a1a;font-size:12px;color:#555;text-transform:uppercase;letter-spacing:0.5px"><div class="dot"></div> digest.mesh</header>
+        <pre style="padding:20px;font-size:13px;line-height:1.7;color:#c0c0c0;margin:0"><span class="kw">parallel</span>:
+  branch commits:
+    http.get <span class="str">"api.github.com/repos/pokelabshq/council/commits"</span>
+      <span class="num">→</span> json.parse <span class="num">→</span> <span class="kw">take</span> <span class="num">5</span>
+  branch issues:
+    http.get <span class="str">"api.github.com/repos/pokelabshq/council/issues"</span>
+      <span class="num">→</span> json.parse <span class="num">→</span> count
+<span class="num">→</span> merge
+<span class="num">→</span> format <span class="str">"📊 daily: {{.commits | count}} commits, {{.issues | count}} open issues"</span>
+<span class="num">→</span> telegram.send <span class="str">"@thealxlabs"</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- playground -->
+<section id="playground">
+  <div class="container">
+    <h2>playground<span>.</span></h2>
+    <p class="lede">try mesh in your browser. edits run live. no server needed — this runs entirely client-side (simulated output for now).</p>
+
+    <div class="playground">
+      <div class="toolbar">
+        <div class="left">
+          <span class="label">mesh v0.1</span>
+        </div>
+        <div class="left">
+          <button onclick="runMesh()" class="active">run</button>
+          <button onclick="clearAll()">clear</button>
+          <button onclick="loadExample('monitor')">monitor</button>
+          <button onclick="loadExample('pipeline')">pipeline</button>
+          <button onclick="loadExample('parallel')">parallel</button>
+        </div>
+      </div>
+      <div class="panes">
+        <div class="pane">
+          <header><div class="dot" style="background:#61afef"></div> input.mesh</header>
+          <textarea id="mesh-input" spellcheck="false">http.get "https://api.github.com/repos/pokelabshq/council/commits"
+  → json.parse
+  → .[0:3]
+  → for each commit:
+      format "{{.sha}} — {{.commit.message}}"
+  → print</textarea>
+        </div>
+        <div class="pane">
+          <header><div class="dot" style="background:#98c379"></div> output</header>
+          <div id="mesh-output" class="output">// click run to execute</div>
+        </div>
+      </div>
+      <div class="status">
+        <div class="indicator" id="status-indicator"></div>
+        <span id="status-text">ready</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- comparison -->
+<section id="compare">
+  <div class="container">
+    <h2>why not yaml?<span>.</span></h2>
+    <p class="lede">mesh vs other approaches for agent workflows.</p>
+
+    <div class="showcase">
+      <div class="panel">
+        <header><div class="dot" style="background:#e5c07b"></div> yaml workflow</header>
+        <pre>name: ci
+on: push
+jobs:
+  build:
+    runs-on: ubuntu
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm test
+      - name: deploy
+        if: success()
+        run: ./deploy.sh</pre>
+      </div>
+      <div class="panel">
+        <header><div class="dot" style="background:#61afef"></div> mesh</header>
+        <pre>check shell "npm test"
+  → if .code == 0:
+      shell "./deploy.sh"
+      → on_error:
+          log "deploy failed"
+          telegram.send "@ops" "deploy failed"</pre>
+      </div>
+    </div>
+
+    <div style="margin-top:32px">
+      <table>
+        <thead><tr><th>feature</th><th>yaml workflows</th><th>python scripts</th><th>mesh</th></tr></thead>
+        <tbody>
+          <tr><td>agent-readable</td><td>✅</td><td>❌</td><td>✅</td></tr>
+          <tr><td>tool-native</td><td>⚠️</td><td>❌</td><td>✅</td></tr>
+          <tr><td>error handling</td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td>parallelism</td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td>composable</td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td>observable</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td>no boilerplate</td><td>✅</td><td>❌</td><td>✅</td></tr>
+          <tr><td>agent-writable</td><td>⚠️</td><td>❌</td><td>✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- get started -->
+<section id="start">
+  <div class="container">
+    <h2>get started<span>.</span></h2>
+    <p class="lede">up and running in 60 seconds.</p>
+
+    <div class="panel" style="background:#111;border:1px solid #1a1a1a;border-radius:6px;overflow:hidden">
+      <header style="padding:12px 20px;border-bottom:1px solid #1a1a1a;font-size:12px;color:#555"><div class="dot" style="background:#e5c07b"></div> terminal</header>
+      <pre style="padding:20px;font-size:13px;line-height:1.8;color:#c0c0c0;margin:0"><span class="cm"># install</span>
+$ git clone https://github.com/pokelabshq/mesh.git
+$ cd mesh
+
+<span class="cm"># try the repl</span>
+$ python3 mesh.py --repl
+mesh&gt; <span class="str">"hello"</span> → <span class="fn">print</span>
+hello
+
+<span class="cm"># run a file</span>
+$ python3 mesh.py run examples/hello.mesh
+
+<span class="cm"># check syntax</span>
+$ python3 mesh.py check myfile.mesh
+
+<span class="cm"># list all tools</span>
+$ python3 mesh.py --tools</pre>
+    </div>
+  </div>
+</section>
+
+<!-- footer -->
+<footer>
+  <div class="container">
+    <span>mesh v0.1 <span style="color:#333">·</span> mit license <span style="color:#333">·</span> poke labs</span>
+    <div class="links">
+      <a href="https://github.com/pokelabshq/mesh">github</a>
+      <a href="https://github.com/pokelabshq/mesh/blob/main/SPEC.md">spec</a>
+      <a href="https://github.com/pokelabshq/mesh/tree/main/examples">examples</a>
+      <a href="https://pokelabs.org">pokelabs</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function runMesh() {
+  const input = document.getElementById('mesh-input').value;
+  const output = document.getElementById('mesh-output');
+  const indicator = document.getElementById('status-indicator');
+  const status = document.getElementById('status-text');
+
+  indicator.className = 'indicator';
+  status.textContent = 'running...';
+  output.textContent = 'executing...';
+
+  // simulate execution for now
+  // TODO: wire up actual interpreter via wasm or api
+  setTimeout(() => {
+    const lines = input.split('\n');
+    const results = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      if (trimmed.includes('http.get') || trimmed.includes('http.post')) {
+        results.push(`[fetch] ${trimmed}`);
+        results.push('  → status: 200');
+      } else if (trimmed.includes('json.parse')) {
+        results.push('[parse] json → object');
+      } else if (trimmed.includes('→')) {
+        results.push(`[pipe] ${trimmed.replace('→', '→')}`);
+      } else if (trimmed.includes('print')) {
+        results.push('[output] ' + (results.length + ' items'));
+      } else if (trimmed.includes('format')) {
+        results.push('[format] ' + trimmed.match(/"([^"]+)"/)?.[1] || '');
+      } else {
+        results.push(`[step] ${trimmed}`);
+      }
+    }
+
+    output.textContent = results.join('\n');
+    status.textContent = 'done';
+    indicator.className = 'indicator';
+  }, 500);
+}
+
+function clearAll() {
+  document.getElementById('mesh-input').value = '';
+  document.getElementById('mesh-output').textContent = '// click run to execute';
+  document.getElementById('status-text').textContent = 'ready';
+}
+
+function loadExample(name) {
+  const examples = {
+    monitor: `loop every 60s:
+  check http.get "https://pokelabs.org/health"
+    → timeout 10s
+    → retry 2:
+        http.get
+    → if .status != 200:
+        log "error" "down: {{.status}}"
+    → else:
+        log "ok — healthy"`,
+
+    pipeline: `http.get "https://api.github.com/repos/pokelabshq/council/commits"
+  → json.parse
+  → .[0:5]
+  → for each commit:
+      format "{{.sha[:7]}} — {{.commit.message}}"
+  → print`,
+
+    parallel: `parallel:
+  branch commits:
+    http.get "api.github.com/repos/pokelabshq/council/commits"
+      → json.parse → take 5
+  branch stars:
+    http.get "api.github.com/repos/pokelabshq/council"
+      → json.parse → .stargazers_count
+→ merge
+→ format "⭐ {{.stars}} stars · {{.commits | count}} recent commits"
+→ print`
+  };
+
+  document.getElementById('mesh-input').value = examples[name] || '';
+  runMesh();
+}
+</script>
+
+</body>
+</html>
