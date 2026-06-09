@@ -413,45 +413,68 @@ check http.get <span class="str">"https://example.com/health"</span>
 <section id="tools">
   <div class="container">
     <h2>tools<span>.</span></h2>
-    <p class="lede">30+ built-in tools. everything is a tool — there's no special syntax for "built-in" vs "external".</p>
+      <p class="lede">47 built-in tools across 9 categories. everything is a tool — there's no special syntax for "built-in" vs "external".</p>
 
     <table>
       <thead>
         <tr><th>tool</th><th>description</th><th>example</th></tr>
       </thead>
       <tbody>
-        <tr><td>json.parse</td><td>parse json string</td><td>'str' → json.parse → .field</td></tr>
+        <tr><td><b>io</b></td><td></td><td></td></tr>
+        <tr><td>print</td><td>print data to stdout</td><td>→ print</td></tr>
+        <tr><td>log</td><td>log message with level</td><td>→ log level="info" "msg"</td></tr>
+        <tr><td>format</td><td>format data with template</td><td>→ format "hi {{.name}}"</td></tr>
+        <tr><td>save</td><td>save to json file</td><td>→ save path="out.json"</td></tr>
+        <tr><td>load</td><td>load from json file</td><td>load "data.json"</td></tr>
+        <tr><td>return</td><td>return data unchanged</td><td>→ return</td></tr>
+        <tr><td><b>collections</b></td><td></td><td></td></tr>
+        <tr><td>filter</td><td>filter by truthiness</td><td>list → filter</td></tr>
+        <tr><td>map</td><td>extract field from dicts</td><td>list → map "name"</td></tr>
+        <tr><td>sort</td><td>sort list</td><td>list → sort by="date"</td></tr>
+        <tr><td>unique</td><td>deduplicate</td><td>list → unique</td></tr>
+        <tr><td>flatten</td><td>flatten nested lists</td><td>[[1,2],[3]] → flatten</td></tr>
+        <tr><td>group</td><td>group by field</td><td>list → group by="type"</td></tr>
+        <tr><td>take</td><td>take first n</td><td>list → take 5</td></tr>
+        <tr><td>skip</td><td>skip first n</td><td>list → skip 10</td></tr>
+        <tr><td>count</td><td>count items</td><td>list → count</td></tr>
+        <tr><td>first</td><td>first item</td><td>list → first</td></tr>
+        <tr><td>last</td><td>last item</td><td>list → last</td></tr>
+        <tr><td>length</td><td>length of collection</td><td>→ length</td></tr>
+        <tr><td>keys</td><td>dict keys</td><td>{d} → keys</td></tr>
+        <tr><td>values</td><td>dict values</td><td>{d} → values</td></tr>
+        <tr><td>merge</td><td>merge parallel results</td><td>→ merge</td></tr>
+        <tr><td><b>json</b></td><td></td><td></td></tr>
+        <tr><td>json.parse</td><td>parse json string</td><td>'{"a":1}' → json.parse</td></tr>
         <tr><td>json.stringify</td><td>serialize to json</td><td>{data} → json.stringify</td></tr>
-        <tr><td>format</td><td>format as string</td><td>{name: "x"} → format "hi {{.name}}"</td></tr>
-        <tr><td>http.get</td><td>http get request</td><td>"http://..." → http.get → .status</td></tr>
-        <tr><td>http.post</td><td>http post request</td><td>"http://..." → http.post body: {}</td></tr>
-        <tr><td>filter</td><td>filter collection</td><td>.items → filter</td></tr>
-        <tr><td>map</td><td>extract field</td><td>.items → map</td></tr>
-        <tr><td>sort</td><td>sort collection</td><td>.items → sort by: .date</td></tr>
-        <tr><td>unique</td><td>deduplicate</td><td>.items → unique by: .id</td></tr>
-        <tr><td>flatten</td><td>flatten nested</td><td>[[1,2],[3]] → flatten</td></tr>
-        <tr><td>take</td><td>take first n</td><td>.items → take 5</td></tr>
-        <tr><td>skip</td><td>skip first n</td><td>.items → skip 10</td></tr>
-        <tr><td>count</td><td>count items</td><td>.items → count</td></tr>
-        <tr><td>first</td><td>first item</td><td>.items → first</td></tr>
-        <tr><td>last</td><td>last item</td><td>.items → last</td></tr>
-        <tr><td>length</td><td>length of collection</td><td>.items → length</td></tr>
-        <tr><td>keys</td><td>dict keys</td><td>{data} → keys</td></tr>
-        <tr><td>values</td><td>dict values</td><td>{data} → values</td></tr>
-        <tr><td>merge</td><td>merge parallel results</td><td>parallel: ... → merge</td></tr>
-        <tr><td>print</td><td>print to stdout</td><td>→ print</td></tr>
-        <tr><td>log</td><td>log message</td><td>→ log "info" "message"</td></tr>
-        <tr><td>return</td><td>return value</td><td>→ return {ok: true}</td></tr>
-        <tr><td>wait</td><td>wait seconds</td><td>wait 5</td></tr>
-        <tr><td>save</td><td>save to file</td><td>→ save "output.json"</td></tr>
-        <tr><td>load</td><td>load from file</td><td>load "input.json"</td></tr>
+        <tr><td><b>http</b></td><td></td><td></td></tr>
+        <tr><td>http.get</td><td>get with auth/headers/params</td><td>"http://..." → http.get bearer="tok"</td></tr>
+        <tr><td>http.post</td><td>post with body</td><td>"http://..." → http.post body={}</td></tr>
+        <tr><td>http.put</td><td>put request</td><td>"http://..." → http.put body={}</td></tr>
+        <tr><td>http.patch</td><td>patch request</td><td>"http://..." → http.patch body={}</td></tr>
+        <tr><td>http.delete</td><td>delete request</td><td>"http://..." → http.delete</td></tr>
+        <tr><td><b>string</b></td><td></td><td></td></tr>
+        <tr><td>upper</td><td>uppercase</td><td>"hi" → upper</td></tr>
+        <tr><td>lower</td><td>lowercase</td><td>"HI" → lower</td></tr>
+        <tr><td>trim</td><td>trim whitespace</td><td>→ trim</td></tr>
+        <tr><td>replace</td><td>replace substring</td><td>→ replace old="a" new="b"</td></tr>
+        <tr><td>split</td><td>split by delimiter</td><td>→ split by=","</td></tr>
+        <tr><td>join</td><td>join with delimiter</td><td>→ join with=", "</td></tr>
+        <tr><td>contains</td><td>check substring</td><td>→ contains "needle"</td></tr>
+        <tr><td><b>math</b></td><td></td><td></td></tr>
+        <tr><td>add</td><td>add numbers</td><td>5 → add 3</td></tr>
+        <tr><td>sub</td><td>subtract</td><td>5 → sub 2</td></tr>
+        <tr><td>mul</td><td>multiply</td><td>5 → mul 3</td></tr>
+        <tr><td>div</td><td>divide</td><td>6 → div 2</td></tr>
+        <tr><td><b>type</b></td><td></td><td></td></tr>
+        <tr><td>type</td><td>get type name</td><td>42 → type</td></tr>
+        <tr><td>string</td><td>to string</td><td>42 → string</td></tr>
+        <tr><td>number</td><td>to number</td><td>"42" → number</td></tr>
+        <tr><td><b>system</b></td><td></td><td></td></tr>
         <tr><td>shell</td><td>run shell command</td><td>shell "ls -la"</td></tr>
         <tr><td>env</td><td>read env var</td><td>env "API_KEY"</td></tr>
         <tr><td>now</td><td>current timestamp</td><td>→ now</td></tr>
         <tr><td>uuid</td><td>generate uuid</td><td>→ uuid</td></tr>
-        <tr><td>type</td><td>type name</td><td>42 → type</td></tr>
-        <tr><td>string</td><td>to string</td><td>42 → string</td></tr>
-        <tr><td>number</td><td>to number</td><td>"42" → number</td></tr>
+        <tr><td>wait</td><td>sleep seconds</td><td>wait 5</td></tr>        <tr><td><b>import</b></td><td></td><td></td></tr>        <tr><td>import</td><td>load mesh module</td><td>import "tools.mesh"</td></tr>        <tr><td>tool</td><td>define custom tool</td><td>tool name: steps: ...</td></tr>
       </tbody>
     </table>
   </div>
@@ -525,18 +548,19 @@ check http.get <span class="str">"https://example.com/health"</span>
 <section id="playground">
   <div class="container">
     <h2>playground<span>.</span></h2>
-    <p class="lede">try mesh in your browser. edits run live. no server needed — this runs entirely client-side (simulated output for now).</p>
+    <p class="lede">try mesh in your browser. runs entirely client-side via the mesh js runtime.</p>
 
     <div class="playground">
       <div class="toolbar">
         <div class="left">
-          <span class="label">mesh v0.1</span>
+          <span class="label">mesh v0.3</span>
+          <span class="label" id="exec-time" style="color:#444"></span>
         </div>
         <div class="left">
-          <button onclick="runMesh()" class="active">run</button>
+          <button onclick="runMesh()" class="active">run (ctrl+enter)</button>
           <button onclick="clearAll()">clear</button>
-          <button onclick="loadExample('monitor')">monitor</button>
           <button onclick="loadExample('pipeline')">pipeline</button>
+          <button onclick="loadExample('transform')">transform</button>
           <button onclick="loadExample('parallel')">parallel</button>
         </div>
       </div>
@@ -631,13 +655,24 @@ mesh&gt; <span class="str">"hello"</span> → <span class="fn">print</span>
 hello
 
 <span class="cm"># run a file</span>
-$ python3 mesh.py run examples/hello.mesh
+$ python3 mesh.py examples/hello.mesh
 
 <span class="cm"># check syntax</span>
-$ python3 mesh.py check myfile.mesh
+$ python3 mesh.py --check myfile.mesh
 
-<span class="cm"># list all tools</span>
-$ python3 mesh.py --tools</pre>
+<span class="cm"># list all tools (47 across 9 categories)</span>
+$ python3 mesh.py --tools
+
+<span class="cm"># start the execution server</span>
+$ python3 meshd.py --port 8080
+
+<span class="cm"># run via http</span>
+$ curl -X POST http://localhost:8080/run \
+    -H "Content-Type: application/json" \
+    -d '{"source": "\"hello\" → upper"}'
+
+<span class="cm"># start the MCP server (for Cursor, Claude Code)</span>
+$ python3 mesh_mcp.py</pre>
     </div>
   </div>
 </section>
@@ -645,7 +680,7 @@ $ python3 mesh.py --tools</pre>
 <!-- footer -->
 <footer>
   <div class="container">
-    <span>mesh v0.1 <span style="color:#333">·</span> mit license <span style="color:#333">·</span> poke labs</span>
+    <span>mesh v0.3 <span style="color:#333">·</span> mit license <span style="color:#333">·</span> poke labs</span>
     <div class="links">
       <a href="https://github.com/pokelabshq/mesh">github</a>
       <a href="https://github.com/pokelabshq/mesh/blob/main/SPEC.md">spec</a>
@@ -663,13 +698,18 @@ function runMesh() {
   const output = document.getElementById('mesh-output');
   const indicator = document.getElementById('status-indicator');
   const status = document.getElementById('status-text');
+  const execTime = document.getElementById('exec-time');
+
+  const t0 = performance.now();
 
   // check syntax first
   const errs = check(input);
   if (errs.length > 0) {
+    const ms = (performance.now() - t0).toFixed(1);
     output.innerHTML = errs.map(e => `<span class="err">error: ${e}</span>`).join('\n');
     indicator.className = 'indicator error';
     status.textContent = `${errs.length} syntax error(s)`;
+    execTime.textContent = `${ms}ms`;
     return;
   }
 
@@ -678,6 +718,7 @@ function runMesh() {
   output.textContent = 'executing...';
 
   run(input).then(result => {
+    const ms = (performance.now() - t0).toFixed(1);
     if (result !== undefined && result !== null) {
       if (typeof result === 'object') {
         if (result.ok === false) {
@@ -693,10 +734,13 @@ function runMesh() {
       }
     }
     status.textContent = 'done';
+    execTime.textContent = `${ms}ms`;
   }).catch(e => {
+    const ms = (performance.now() - t0).toFixed(1);
     output.innerHTML = `<span class="err">runtime error: ${e.message}</span>`;
     indicator.className = 'indicator error';
     status.textContent = 'error';
+    execTime.textContent = `${ms}ms`;
   });
 }
 
@@ -745,6 +789,14 @@ function loadExample(name) {
 window.runMesh = runMesh;
 window.clearAll = clearAll;
 window.loadExample = loadExample;
+
+// ctrl+enter to run
+document.getElementById('mesh-input').addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'Enter') {
+    e.preventDefault();
+    runMesh();
+  }
+});
 </script>
 
 </body>
