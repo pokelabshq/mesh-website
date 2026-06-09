@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>docs — mesh</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  font-size: 14px; line-height: 1.7;
+  color: #c0c0c0;
+  background: #0a0a0a;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: #61afef; text-decoration: none; }
+a:hover { text-decoration: underline; }
+::selection { background: #333; color: #fff; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+/* nav */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.95);
+  border-bottom: 1px solid #1a1a1a;
+  backdrop-filter: blur(8px);
+}
+nav .container { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+nav .logo { font-weight: 700; font-size: 16px; color: #fff; text-decoration: none; }
+nav .logo span { color: #444; }
+nav .links { display: flex; gap: 20px; }
+nav .links a { color: #888; text-decoration: none; font-size: 13px; }
+nav .links a:hover { color: #fff; }
+nav .links .active { color: #fff; }
+
+/* sidebar + content */
+.layout {
+  display: grid; grid-template-columns: 220px 1fr;
+  margin-top: 52px; min-height: calc(100vh - 52px);
+}
+.sidebar {
+  position: fixed; top: 52px; bottom: 0; width: 220px;
+  background: #0a0a0a; border-right: 1px solid #1a1a1a;
+  padding: 24px 16px; overflow-y: auto;
+}
+.sidebar h3 { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.sidebar a {
+  display: block; padding: 4px 8px; color: #888; font-size: 13px;
+  border-radius: 4px; margin-bottom: 2px; text-decoration: none;
+}
+.sidebar a:hover { background: #111; color: #fff; }
+.sidebar a.active { background: #111; color: #61afef; }
+.sidebar .section { margin-bottom: 24px; }
+
+.content {
+  margin-left: 220px;
+  padding: 48px 48px 96px;
+}
+
+.content h1 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.content h2 { font-size: 22px; font-weight: 700; color: #fff; margin-top: 48px; margin-bottom: 16px; padding-top: 24px; border-top: 1px solid #1a1a1a; }
+.content h3 { font-size: 16px; font-weight: 600; color: #fff; margin-top: 32px; margin-bottom: 12px; }
+.content p { color: #888; margin-bottom: 16px; }
+.content code {
+  background: #1a1a1a; padding: 2px 6px; border-radius: 3px;
+  font-size: 13px; color: #e06c75;
+}
+.content pre {
+  background: #111; border: 1px solid #1a1a1a; border-radius: 6px;
+  padding: 20px 24px; margin-bottom: 24px; overflow-x: auto;
+  font-size: 13px; line-height: 1.7; color: #c0c0c0;
+}
+.content pre .cm { color: #5c6370; }
+.content pre .fn { color: #61afef; }
+.content pre .str { color: #98c379; }
+.content pre .kw { color: #c678dd; }
+.content pre .pipe { color: #e5c07b; }
+.content pre .num { color: #d19a66; }
+
+.content table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px; }
+.content table th {
+  text-align: left; padding: 10px 14px;
+  border-bottom: 1px solid #1a1a1a; color: #555;
+  font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.content table td { padding: 10px 14px; border-bottom: 1px solid #111; color: #c0c0c0; }
+.content table td:first-child { color: #61afef; font-weight: 500; }
+.content table td:nth-child(2) { color: #888; font-size: 12px; }
+.content table td:nth-child(3) { color: #98c379; font-size: 12px; }
+
+.toc { margin-bottom: 48px; }
+.toc a { display: block; color: #61afef; margin-bottom: 4px; }
+
+/* responsive */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .content { margin-left: 0; padding: 24px; }
+  .layout { grid-template-columns: 1fr; }
+}
+
+footer {
+  padding: 40px 0; border-top: 1px solid #1a1a1a;
+  font-size: 12px; color: #444; text-align: center;
+  margin-left: 220px;
+}
+@media (max-width: 768px) { footer { margin-left: 0; } }
+</style>
+</head>
+<body>
+<nav>
+  <div class="container">
+    <a href="/" class="logo">mesh<span>.</span></a>
+    <div class="links">
+      <a href="/#features">features</a>
+      <a href="/#syntax">syntax</a>
+      <a href="/#tools">tools</a>
+      <a href="/docs" class="active">docs</a>
+      <a href="/#playground">playground</a>
+      <a href="https://github.com/pokelabshq/mesh">github</a>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="section">
+      <h3>getting started</h3>
+      <a href="#intro" class="active">introduction</a>
+      <a href="#install">installation</a>
+      <a href="#quickstart">quick start</a>
+    </div>
+    <div class="section">
+      <h3>language</h3>
+      <a href="#syntax">syntax</a>
+      <a href="#values">values</a>
+      <a href="#tools">tool calls</a>
+      <a href="#pipes">pipes</a>
+      <a href="#conditionals">conditionals</a>
+      <a href="#loops">loops</a>
+      <a href="#parallel">parallel</a>
+      <a href="#errors">error handling</a>
+    </div>
+    <div class="section">
+      <h3>tools</h3>
+      <a href="#core">core tools</a>
+      <a href="#fs">file system</a>
+      <a href="#git">git</a>
+      <a href="#http">http</a>
+      <a href="#crypto">crypto</a>
+      <a href="#time">time</a>
+      <a href="#string">string</a>
+      <a href="#math">math</a>
+      <a href="#net">network</a>
+      <a href="#system">system</a>
+      <a href="#docker">docker</a>
+      <a href="#github">github</a>
+      <a href="#ai">ai</a>
+      <a href="#collections">collections</a>
+    </div>
+    <div class="section">
+      <h3>reference</h3>
+      <a href="#cli">cli</a>
+      <a href="#server">server</a>
+      <a href="#config">mesh.yaml</a>
+      <a href="#grammar">grammar</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <h1 id="intro">mesh documentation</h1>
+    <p>complete reference for the mesh programming language. written for humans and agents.</p>
+
+    <h2 id="install">installation</h2>
+    <pre># python runtime
+git clone https://github.com/pokelabshq/mesh.git
+cd mesh
+
+# run directly
+python3 mesh.py --repl
+
+# run a file
+python3 mesh.py run example.mesh
+
+# js runtime (node)
+node runtimes/js/mesh.js --repl</pre>
+
+    <h2 id="quickstart">quick start</h2>
+    <pre><span class="cm"># hello.mesh</span>
+
+<span class="str">"hello, world!"</span> <span class="pipe">→</span> <span class="fn">print</span>
+
+<span class="cm"># fetch and transform</span>
+
+<span class="fn">http.get</span> <span class="str">"https://api.github.com/repos/pokelabshq/council/commits"</span>
+  <span class="pipe">→</span> <span class="fn">json.parse</span>
+  <span class="pipe">→</span> <span class="fn">take</span> <span class="num">5</span>
+  <span class="pipe">→</span> <span class="fn">print</span></pre>
+
+    <h2 id="syntax">syntax</h2>
+    <p>mesh syntax is minimal. pipelines flow left to right. indentation defines blocks.</p>
+
+    <h3 id="values">values</h3>
+    <table>
+      <thead><tr><th>type</th><th>syntax</th><th>example</th></tr></thead>
+      <tbody>
+        <tr><td>string</td><td>"text" or 'text'</td><td>"hello"</td></tr>
+        <tr><td>number</td><td>digits</td><td>42, 3.14</td></tr>
+        <tr><td>boolean</td><td>true, false</td><td>true</td></tr>
+        <tr><td>null</td><td>null</td><td>null</td></tr>
+        <tr><td>field</td><td>.field</td><td>.name, .items</td></tr>
+        <tr><td>index</td><td>[n]</td><td>[0], [-1]</td></tr>
+        <tr><td>slice</td><td>[start:end]</td><td>[:5], [1:3]</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="tools">tool calls</h3>
+    <pre><span class="fn">tool_name</span> arg1 arg2 key=value --flag</pre>
+    <p>tool names can contain dots (<code>http.get</code>, <code>json.parse</code>). positional args come first, then key=value pairs, then --flags.</p>
+
+    <h3 id="pipes">pipes</h3>
+    <pre><span class="fn">step_a</span> <span class="pipe">→</span> <span class="fn">step_b</span> <span class="pipe">→</span> <span class="fn">step_c</span></pre>
+    <p>data flows left to right. output of one step is input to the next.</p>
+
+    <h3 id="conditionals">conditionals</h3>
+    <pre><span class="kw">if</span> .status == <span class="num">200</span>:
+    <span class="fn">log</span> <span class="str">"ok"</span>
+<span class="pipe">→</span> <span class="kw">else</span>:
+    <span class="fn">log</span> <span class="str">"failed"</span></pre>
+
+    <h3 id="loops">loops</h3>
+    <pre><span class="cm"># for each item</span>
+<span class="fn">json.parse</span> <span class="pipe">→</span> <span class="kw">for each</span> items:
+    <span class="fn">format</span> <span class="str">"{{.name}}"</span>
+
+<span class="cm"># timed loop</span>
+<span class="kw">loop every</span> <span class="num">60</span>s:
+    <span class="fn">http.get</span> <span class="str">"https://example.com/health"</span></pre>
+
+    <h3 id="parallel">parallel</h3>
+    <pre><span class="kw">parallel</span>:
+  <span class="kw">branch</span> users:
+    <span class="fn">http.get</span> <span class="str">"url/users"</span> <span class="pipe">→</span> <span class="fn">json.parse</span>
+  <span class="kw">branch</span> posts:
+    <span class="fn">http.get</span> <span class="str">"url/posts"</span> <span class="pipe">→</span> <span class="fn">json.parse</span>
+<span class="pipe">→</span> <span class="fn">merge</span>
+<span class="pipe">→</span> <span class="fn">print</span></pre>
+
+    <h3 id="errors">error handling</h3>
+    <pre><span class="kw">retry</span> <span class="num">3</span>, <span class="kw">backoff</span> <span class="num">2</span>:
+    <span class="fn">http.get</span> <span class="str">"https://flaky.example.com"</span>
+<span class="pipe">→</span> <span class="kw">on_error</span>:
+    <span class="fn">log</span> <span class="str">"failed"</span>
+    <span class="kw">return</span> {ok: <span class="kw">false</span>}</pre>
+
+    <h2 id="core">core built-in tools</h2>
+    <p>116 tools across 12 categories. all tools are first-class — no distinction between "built-in" and "external".</p>
+
+    <table>
+      <thead><tr><th>category</th><th>count</th><th>description</th></tr></thead>
+      <tbody>
+        <tr><td>core</td><td>18</td><td>print, json, format, type, flow control</td></tr>
+        <tr><td>fs</td><td>12</td><td>read, write, append, exists, list, mkdir, remove, copy, move, info, readdir, glob</td></tr>
+        <tr><td>git</td><td>9</td><td>status, log, commit, push, pull, diff, branch, clone, checkout</td></tr>
+        <tr><td>crypto</td><td>9</td><td>md5, sha1, sha256, sha512, base64, random, uuid</td></tr>
+        <tr><td>time</td><td>7</td><td>now, unix, ms, format, sleep, parse, diff</td></tr>
+        <tr><td>string</td><td>18</td><td>upper, lower, trim, split, join, replace, contains, starts, ends, length, reverse, pad, slice, match, extract, lines, words, truncate</td></tr>
+        <tr><td>math</td><td>17</td><td>add, sub, mul, div, mod, pow, sqrt, abs, round, floor, ceil, min, max, sum, avg, clamp, range</td></tr>
+        <tr><td>net</td><td>5</td><td>ping, dns, ip, fetch, status</td></tr>
+        <tr><td>system</td><td>11</td><td>os, arch, cpus, memory, disk, uptime, env, pid, user, cwd, hostname</td></tr>
+        <tr><td>docker</td><td>6</td><td>ps, images, logs, exec, build, run</td></tr>
+        <tr><td>github</td><td>6</td><td>repos, commits, issues, stars, forks, search</td></tr>
+        <tr><td>ai</td><td>5</td><td>sentiment, summarize, extract, keywords, readability</td></tr>
+        <tr><td>collections</td><td>10</td><td>group, count, zip, enumerate, chunk, window, sample, shuffle, transpose, pivot</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="cli">cli reference</h2>
+    <pre><span class="cm"># run a file</span>
+mesh run file.mesh
+
+<span class="cm"># check syntax</span>
+mesh check file.mesh
+
+<span class="cm"># interactive repl</span>
+mesh --repl
+
+<span class="cm"># list tools</span>
+mesh --tools
+
+<span class="cm"># count tools</span>
+mesh --count</pre>
+
+    <h2 id="server">server</h2>
+    <pre><span class="cm"># start mesh server</span>
+node runtimes/js/server.js
+node runtimes/js/server.js --port=8080
+
+<span class="cm"># endpoints</span>
+POST /run     — run mesh source code
+POST /check   — check syntax
+GET  /tools   — list available tools
+GET  /health  — health check</pre>
+
+    <h2 id="config">mesh.yaml</h2>
+    <pre>name: my-project
+version: 0.1.0
+
+tools:
+  - name: sentiment
+    url: http://localhost:8764
+  - name: telegram
+    token: "${TELEGRAM_TOKEN}"
+
+defaults:
+  retry: 3
+  timeout: 30</pre>
+
+    <h2 id="grammar">informal grammar</h2>
+    <pre>program     ::= statement*
+statement   ::= pipeline | import | tool_def | parallel | conditional | loop | retry_block
+pipeline    ::= step ( "→" step )*
+step        ::= tool_call | ref | value
+tool_call   ::= NAME (arg | KEYWORD "=" value | "--" FLAG)*
+ref         ::= "." FIELD ("[" (INT | slice) "]")?
+value       ::= STRING | NUMBER | "true" | "false" | "null"
+import      ::= "import" STRING
+tool_def    ::= "tool" NAME ":" block
+parallel    ::= "parallel:" ( "branch" NAME ":" block )+
+conditional ::= "if" expr ":" block ( "→" "else:" block )?
+loop        ::= "loop" "every" INT "s:" block
+retry_block ::= "retry" INT ("," "backoff" INT)? ":" block ( "→" "on_error:" block )?
+block       ::= INDENT statement+ DEDENT</pre>
+
+    <footer>
+      mesh v0.1.0 · mit license · poke labs
+    </footer>
+  </div>
+</div>
+</body>
+</html>
